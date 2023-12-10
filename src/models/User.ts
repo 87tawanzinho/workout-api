@@ -10,6 +10,11 @@ let User = new mongoose.Schema({
       description: String,
     },
   ],
+  cartas: [
+    {
+      description: String,
+    },
+  ],
 });
 
 const UserModel = mongoose.model("User", User);

@@ -93,6 +93,33 @@ const CreateExercise = async (req: Request, res: Response) => {
   }
 };
 
+const CreateMeta = async (req: Request, res: Response) => {
+  const { description } = req.body;
+  const { username } = req.params;
+
+  try {
+    const user = await UserModel.findOneAndUpdate(
+      { user: username },
+      {
+        $push: {
+          cartas: {
+            description: description,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(201).json(user);
+  } catch (error: any) {
+    return res.status(500).send(error.message);
+  }
+};
+
 const ShowExercises = async (req: Request, res: Response) => {
   const { user } = req.body;
 
@@ -109,4 +136,64 @@ const ShowExercises = async (req: Request, res: Response) => {
   }
 };
 
-export { allUsers, login, Create, CreateExercise, ShowExercises };
+const ShowMetas = async (req: Request, res: Response) => {
+  const { user } = req.body;
+
+  try {
+    const userMetas = await UserModel.findOne({ user: user });
+
+    if (!userMetas) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(userMetas.cartas);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message } + user);
+  }
+};
+
+const deleteExercise = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { idGym } = req.body;
+
+  try {
+    const result = await UserModel.updateOne(
+      { _id: userId },
+      { $pull: { exercises: { _id: idGym } } }
+    );
+
+    return res.status(200).json({ message: "work deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting carta:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const deleteMeta = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { MetaToDelete } = req.body;
+
+  try {
+    const result = await UserModel.updateOne(
+      { _id: userId },
+      { $pull: { cartas: { _id: MetaToDelete } } }
+    );
+
+    return res.status(200).json({ message: "Carta deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting carta:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export {
+  allUsers,
+  login,
+  Create,
+  CreateExercise,
+  ShowExercises,
+  ShowMetas,
+  CreateMeta,
+  deleteMeta,
+  deleteExercise,
+};
