@@ -9,6 +9,6 @@ app.use(router);
 const mongoDB = require("./database/mongoose");
 mongoDB;
 
-app.listen(3200, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log("server");
 });
